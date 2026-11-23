@@ -1,6 +1,7 @@
 import os
 import dotenv as env
 from google import genai
+from google.genai import errors
 from groq import Groq
 from pydantic import BaseModel,ValidationError
 from typing import Optional
@@ -18,16 +19,19 @@ GROQ_MODEL = env.get_key(ENVPATH,key_to_get="GROQ_MODELS")
 
 
 def extract():
-    
-    with genai.Client(api_key=GEMINI_KEY) as client:
-        userPrompt = readSample+readPrompt()
-        resp = client.models.generate_content(
-            model=GEMINI_MODEL,
-            contents = userPrompt if userPrompt  is not None else " ",
-            config={"response_schema":Extracted}
-        )
-        print(resp)
-
+    try:
+        with genai.Client(api_key=GEMINI_KEY) as client:
+            userPrompt = readSample()+readPrompt()
+            resp = client.models.generate_content(
+                model=GEMINI_MODEL,
+                contents = userPrompt if userPrompt  is not None else " ",
+                config={"response_schema":Extracted}
+            )
+            print(resp.parsed)
+    except errors.ServerError as err:
+        if err.code == '503':
+            print("The server is currently unavailable kindly try again after 30 sec")
+        
 def readPrompt():
     try:
         with open(f"{PROMPTPATH}/extract.txt",'r') as input:
@@ -38,12 +42,12 @@ def readPrompt():
 def readSample():
     try:
         with open(f"{SAMPLESPATH}/hn_00.txt") as sample:
-            sampleText = input.read()
+            sampleText = sample.read()
             return sampleText
     except FileNotFoundError as err:
         print("Invalid file path. File not found")
 def main():
-    readPrompt()
+    extract()
 
 if __name__ == "__main__":
     main()
