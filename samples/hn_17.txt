@@ -1,0 +1,8 @@
+Starbridge | Senior Product Engineer | NYC | Full-time |
+https://starbridge.ai/ Starbridge is building an AI platform that turns large-scale public and enterprise data into reliable sales insights. We are early, moving fast, and building from zero to one, so this role will have huge ownership and product impact.
+
+Product Engineer: (React/Typescript) who would work closely with product and design to build user-facing parts of the platform. You will craft performant, stable frontends that explain technical concepts to non-technical users and help us iterate fast based on customer feedback.
+
+We're looking to build our in-person team in NYC!
+
+Apply: https://starbridge.ai/careers and mention HackerNews or email [email] with your resume in pdf format.

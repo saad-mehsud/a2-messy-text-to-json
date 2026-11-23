@@ -1,0 +1,13 @@
+University of Cambridge, University of Manchester | PhD in AI / Earth Observation / Environmental Science | ONSITE | UK home fee status only | £30k tax-free annual stipend
+
+Our group at Cambridge works on Earth Observation foundation models (Tessera: v1 https://arxiv.org/abs/2506.20380, v2 https://arxiv.org/abs/2607.03949, https://geotessera.org/) and we've started a collaboration with Manchester to understand how they can be used to improve pollution models and then environmental decision making in general. This involves training new models and doing high-resolution inference across national or even global scales, as well as figuring out how to use that data to help policymakers make better decisions.
+
+As part of this work we have a PhD studentship through the joint Manchester-Cambridge Centre for Doctoral Training for AI in Decision Making for Complex Systems. This involves one year at Manchester doing taught postgraduate study and then three years at Cambridge for the PhD.
+
+Our work is all open source and involves solving significant compute and data challenges. Training our current-generation model takes ~250k GPU hours and a single year of global inference needs to move over 5.5 petabytes of data through the inference pipeline. This project would suit someone with strong machine learning and software engineering experience. We can help you build the atmospheric science and Earth Observation skills.
+
+We are a highly collaborative group who spend our time not only on foundational research but also on developing applications with practitioners and decision makers. Our work sees use in many industrial, academic and government environments for problems like crop classification, tree species mapping and change detection.
+
+You can find out more here: https://www.findaphd.com/phds/project/from-satellite-to-stre... - if you have questions about the project you can contact me, Sadiq Jaffer, at [email] . For questions about the application process you'll want [email] .
+
+Application deadline is Friday 4th of December with a course start date of September 2027.

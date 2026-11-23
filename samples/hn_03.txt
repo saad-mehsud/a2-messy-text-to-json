@@ -1,0 +1,16 @@
+Open Education Applications / Neon | Senior Frontend Engineer | Utrecht, The Netherlands | HYBRID | DUTCH REQUIRED
+
+Please note: working proficiency in Dutch is strictly required for these roles, and we kindly ask for no automated applications. The rest of this post will continue in Dutch.
+
+Wij zijn een non-profit die zich inzet om lesmateriaal voor scholen beter, betaalbaarder en flexibeler te maken, in zowel digitale als gedrukte vorm.
+
+Werktijden en kantoordagen zijn flexibel en worden in overleg bepaald op basis van de rol. Wij bieden een competitief salaris.
+
+Openstaande rol:
+
+- Senior Frontend Engineer
+  Ervaring met Yjs of vergelijkbare CRDT frameworks/algoritmen vereist.
+
+E-mail jobs[at]openeducation.foundation met (HN) + de functienaam in het onderwerp, samen met een korte introductie en een link naar je LinkedIn-profiel en/of GitHub. Als er van beide kanten een goede match lijkt te zijn, plan ik graag een kennismakingsgesprek in.
+
+https://openeducation.foundation | https://www.neon.nl
