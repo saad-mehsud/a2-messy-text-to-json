@@ -8,3 +8,4 @@ class Extracted(BaseModel):
     salary:Optional[str] = None
     location:Optional[str] = None
     skills:list[str]
+    message:str|None
