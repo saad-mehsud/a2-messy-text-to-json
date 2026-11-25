@@ -49,10 +49,11 @@ def extract(messyText = " ",tries = 3):
     for i in range(tries):
         try:
             extracted = askGemini(messyText)
-            Extracted.model_validate(extracted)
-        except ValidationError:
+            return Extracted.model_validate_json(extracted)
+        except ValidationError as err:
             print("Validation Error occured. Retrying........",file = sys.stderr)
-            askGemini()
+            message = f"""Data is not validate properly {err}.
+            Correct the response and provide valid json for {extract}"""
 
         
 def generateSystemPrompt():
@@ -67,7 +68,7 @@ def main():
     while(True):
         messyText = input("Enter Messy text of job post:")
         extractedText = extract(messyText)
-        print(extractedText)
+        print(extractedText.model_dump_json)
 
 if __name__ == "__main__":
     generateSystemPrompt()
