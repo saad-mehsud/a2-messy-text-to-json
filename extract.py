@@ -1,75 +1,122 @@
-# Imports that will be used 
-import os,sys,time
-import dotenv as env
+import os
+import sys
+import time
+
+from dotenv import load_dotenv
 from google import genai
 from google.genai import errors
-from groq import Groq
-from pydantic import BaseModel,ValidationError
-from typing import Optional
+from pydantic import ValidationError
+
 from schema import Extracted
 
 
-# Global constant and environments variable
-PATH = os.path.dirname(os.path.abspath(__file__))
-ENVPATH = f"{PATH}/.env"
-PROMPTPATH = f"{PATH}/prompts"
-SAMPLESPATH = f"{PATH}/samples"
-env.load_dotenv()
-GEMINI_KEY = env.get_key(ENVPATH,key_to_get="GEMINI_API_KEY")
-GEMINI_MODEL = env.get_key(ENVPATH,key_to_get="GEMINI_MODELS")
-GROQ_KEY = env.get_key(ENVPATH,key_to_get="GROQ_API_KEY")
-GROQ_MODEL = env.get_key(ENVPATH,key_to_get="GROQ_MODELS")
-SYSTEM_PROMPT = ""
+base_path = os.path.dirname(os.path.abspath(__file__))
+env_path = f"{base_path}/.env"
+prompt_path = f"{base_path}/prompts"
+load_dotenv(env_path)
+
+gemini_key = os.getenv("GEMINI_API_KEY")
+gemini_model = os.getenv("GEMINI_MODELS")
 
 
-def askGemini(message):
-    try:
-        with genai.Client(api_key=GEMINI_KEY) as client:
-            resp = client.models.generate_content(
-                model=GEMINI_MODEL,
-                config={
-                    "system_instruction":SYSTEM_PROMPT,
-                    "response_schema":Extracted
-                    },
-                contents = message 
-            )
-            return resp.parsed       
-
-    except errors.ServerError as err:
-        if err.code == 503:
-            print(f"Server Unavailable.Retrying.........\n{err.details}",file=sys.stderr)
-    except errors.APIError as err:
-        if err.code in [401,403]:
-            return "Invalid API key was provided, provide a valid API key"
-   
-
-
-def extract(messyText = " ",tries = 3):
-
-    for i in range(tries):
+def ask_gemini(
+    client: genai.Client,
+    message: str,
+    system_prompt: str,
+) -> str:
+    for attempt in range(4):
         try:
-            extracted = askGemini(messyText)
-            return Extracted.model_validate_json(extracted)
+            response = client.models.generate_content(
+                model=gemini_model,
+                config={
+                    "system_instruction": system_prompt,
+                    "response_schema": Extracted,
+                    "response_mime_type": "application/json"
+                },
+                
+                contents=message,
+            )
+        except errors.APIError as err:
+            if err.code in (401, 403):
+                print(
+                    "Invalid API key was provided; provide a valid API key.",
+                    file=sys.stderr,
+                )
+                raise SystemExit(1) from err
+            if err.code != 503 or attempt == 3:
+                raise
+
+            delay = 2**attempt
+            print(
+                f"Server unavailable. Retrying in {delay}s.\n{err}",
+                file=sys.stderr,
+            )
+            time.sleep(delay)
+            continue
+
+        if response.text is None:
+            raise ValueError("Gemini returned no response text.")
+        return response.text
+
+    raise RuntimeError("Gemini request retry loop ended unexpectedly.")
+
+
+def extract(
+    client: genai.Client,
+    original_text: str,
+    system_prompt: str,
+    tries: int = 3,
+) -> Extracted | None:
+    message = original_text
+    for attempt in range(tries):
+        try:
+            response_text = ask_gemini(client, message, system_prompt)
+            return Extracted.model_validate_json(response_text)
         except ValidationError as err:
-            print("Validation Error occured. Retrying........",file = sys.stderr)
-            message = f"""Data is not validate properly {err}.
-            Correct the response and provide valid json for {extract}"""
+            print(f"Validation error occurred:\n{err}", file=sys.stderr)
+            if attempt + 1 < tries:
+                message = (
+                    f"{original_text}\n\n"
+                    f"Validation error:\n{err}\n\n"
+                    "Return valid JSON only."
+                )
 
-        
-def generateSystemPrompt():
+    return None
+
+
+def generate_system_prompt() -> str:
     try:
-        with open(f"{PROMPTPATH}/extract.txt",'r') as input:
-            SYSTEM_PROMPT = input.read()
-    except FileNotFoundError as err:
-        print("Invalid file path.File not found.\n Process can not be continued without system prompt.")
-        sys.exit(1)
+        with open(f"{prompt_path}/extract.txt", "r") as prompt_file:
+            return prompt_file.read()
+    except FileNotFoundError:
+        print(
+            "Invalid file path. File not found.\n"
+            "Process cannot be continued without system prompt.",
+            file=sys.stderr,
+        )
+        raise SystemExit(1)
 
-def main():
-    while(True):
-        messyText = input("Enter Messy text of job post:")
-        extractedText = extract(messyText)
-        print(extractedText.model_dump_json)
+
+def main() -> None:
+    system_prompt = generate_system_prompt()
+    with genai.Client(api_key=gemini_key) as client:
+        while True:
+            print(
+                "Enter messy text of job post (end with Ctrl-D / Ctrl-Z+Enter):",
+                end="",
+                flush=True,
+            )
+            messy_text = sys.stdin.read()
+            print("Extraction Started")
+            if not messy_text:
+                break
+
+            extracted_text = extract(client, messy_text, system_prompt)
+            if extracted_text is None:
+                print("Could not extract valid job data after all attempts.", file=sys.stderr)
+                continue
+            print(extracted_text.model_dump_json())
+
 
 if __name__ == "__main__":
-    generateSystemPrompt()
     main()
